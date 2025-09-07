@@ -1,0 +1,5 @@
+[33mac7974b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m chore: trigger deploy
+[33m14ff0b7[m ALTERAÇÕES COMITADAS
+[33m7309274[m Fix: Corrigir sistema de login para usar autenticação local
+[33m2376680[m Add vercel.json configuration and update documentation
+[33mba25d4d[m Fix middleware and build issues for Vercel deployment

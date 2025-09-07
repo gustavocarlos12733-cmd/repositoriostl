@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Shield, Eye, EyeOff } from "lucide-react"
 import Link from "next/link"
+import { createClient } from "@/lib/supabase/client"
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState("")
@@ -24,15 +25,29 @@ export default function AdminLoginPage() {
     setIsLoading(true)
     setError("")
 
-    if (username === "admin" && password === "stlclub2024") {
-      // Salvar status de admin no localStorage
-      localStorage.setItem("isAdminLoggedIn", "true")
-      router.push("/admin")
-    } else {
-      setError("Credenciais inválidas. Tente novamente.")
-    }
+    try {
+      const supabase = createClient()
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: username.trim(),
+        password: password.trim(),
+      })
+      if (signInError) throw signInError
 
-    setIsLoading(false)
+      const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+      // Garante que os cookies estejam aplicados antes do middleware rodar
+      await supabase.auth.getSession()
+      if (adminEmail && username.trim() === adminEmail) {
+        if (typeof window !== "undefined") window.location.href = "/admin"
+        else router.replace("/admin")
+      } else {
+        if (typeof window !== "undefined") window.location.href = "/dashboard"
+        else router.replace("/dashboard")
+      }
+    } catch (err: any) {
+      setError(typeof err?.message === "string" ? err.message : "Falha no login")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -61,15 +76,15 @@ export default function AdminLoginPage() {
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="username" className="text-gray-300">
-                  Usuário
+                  Email
                 </Label>
                 <Input
                   id="username"
-                  type="text"
+                  type="email"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="bg-gray-800/50 border-gray-600 text-white focus:border-yellow-400 focus:ring-yellow-400/20"
-                  placeholder="Digite seu usuário"
+                  placeholder="admin@seu-dominio.com"
                   required
                 />
               </div>

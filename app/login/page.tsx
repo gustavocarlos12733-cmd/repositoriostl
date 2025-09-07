@@ -4,11 +4,11 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { loginUser } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
+import { createClient } from "@/lib/supabase/client"
 
 export default function LoginPage() {
   const [name, setName] = useState("")
@@ -21,20 +21,47 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim()) return
+    if (!email.trim() || !password.trim()) {
+      setError("Informe email e senha")
+      return
+    }
 
     setIsLoading(true)
     setError(null)
 
     try {
-      // Para login simples, apenas verifica se o email está preenchido
-      // O sistema local não requer senha real para usuários comuns
-      const user = loginUser(name.trim() || email.split('@')[0], email.trim())
-      
-      // Redireciona para o dashboard
-      router.push("/dashboard")
-    } catch (error: any) {
-      setError("Erro ao processar solicitação")
+      const supabase = createClient()
+
+      if (isSignUp) {
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: email.trim(),
+          password: password.trim(),
+          options: {
+            data: name.trim() ? { name: name.trim() } : undefined,
+          },
+        })
+        if (signUpError) throw signUpError
+        // Após cadastro, também tentar login para entrar direto
+        const { error: loginAfterSignUpError } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password: password.trim(),
+        })
+        if (loginAfterSignUpError) throw loginAfterSignUpError
+      } else {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: email.trim(),
+          password: password.trim(),
+        })
+        if (signInError) throw signInError
+      }
+
+      // Garante que os cookies de sessão estejam aplicados antes do middleware
+      await supabase.auth.getSession()
+      if (typeof window !== "undefined") window.location.href = "/dashboard"
+      else router.replace("/dashboard")
+    } catch (err: any) {
+      const message = typeof err?.message === "string" ? err.message : "Erro ao autenticar"
+      setError(message)
     } finally {
       setIsLoading(false)
     }
@@ -71,7 +98,6 @@ export default function LoginPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-cyan-400"
-                    required={isSignUp}
                   />
                 </div>
               )}
@@ -91,21 +117,20 @@ export default function LoginPage() {
                 />
               </div>
 
-              {isSignUp && (
-                <div className="space-y-2">
-                  <Label htmlFor="password" className="text-white">
-                    Senha (opcional)
-                  </Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Sua senha (opcional)"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-cyan-400"
-                  />
-                </div>
-              )}
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-white">
+                  Senha
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Sua senha"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-cyan-400"
+                  required
+                />
+              </div>
 
               {error && <div className="text-red-400 text-sm text-center">{error}</div>}
 
@@ -114,13 +139,7 @@ export default function LoginPage() {
                 className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold"
                 disabled={isLoading}
               >
-                {isLoading
-                  ? isSignUp
-                    ? "Criando conta..."
-                    : "Entrando..."
-                  : isSignUp
-                    ? "Criar Conta"
-                    : "Acessar Área de Membros"}
+                {isLoading ? (isSignUp ? "Criando conta..." : "Entrando...") : isSignUp ? "Criar Conta" : "Acessar Área de Membros"}
               </Button>
 
               <div className="text-center">

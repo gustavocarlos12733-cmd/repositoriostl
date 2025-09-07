@@ -1,7 +1,8 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
-import { type User, getUser, logout as authLogout } from "@/lib/auth"
+import { type User } from "@/lib/auth"
+import { createClient } from "@/lib/supabase/client"
 
 interface AuthContextType {
   user: User | null
@@ -17,23 +18,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    try {
-      const storedUser = getUser()
-      setUser(storedUser)
-    } catch (error) {
-      console.error("Erro ao carregar usuário:", error)
-      setUser(null)
-    } finally {
-      setIsLoading(false)
+    const loadUserFromSupabase = async () => {
+      try {
+        const supabase = createClient()
+        const { data, error } = await supabase.auth.getUser()
+        if (error) {
+          setUser(null)
+        } else if (data.user) {
+          const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+          const normalizedUser: User = {
+            id: data.user.id,
+            name: (data.user.user_metadata as any)?.name || data.user.email || "Usuário",
+            email: data.user.email || "",
+            isAdmin: adminEmail ? data.user.email === adminEmail : false,
+            joinedAt: new Date().toISOString(),
+          }
+          setUser(normalizedUser)
+        } else {
+          setUser(null)
+        }
+      } catch (error) {
+        console.error("Erro ao carregar usuário (Supabase):", error)
+        setUser(null)
+      } finally {
+        setIsLoading(false)
+      }
     }
+
+    void loadUserFromSupabase()
   }, [])
 
   const login = (user: User) => {
     setUser(user)
   }
 
-  const logout = () => {
-    authLogout()
+  const logout = async () => {
+    try {
+      const supabase = createClient()
+      await supabase.auth.signOut()
+    } catch {}
     setUser(null)
   }
 

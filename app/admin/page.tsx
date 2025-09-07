@@ -23,7 +23,7 @@ import {
 import Link from "next/link"
 
 export default function AdminPage() {
-  const { user } = useAuth()
+  const { user, isLoading } = useAuth()
   const router = useRouter()
   const [modules, setModules] = useState<Module[]>([])
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false)
@@ -35,18 +35,25 @@ export default function AdminPage() {
   })
 
   useEffect(() => {
-    const adminStatus = localStorage.getItem("isAdminLoggedIn")
-    if (adminStatus !== "true") {
-      router.push("/admin-login")
+    // Enquanto carregamos o usuário do Supabase, evita piscar
+    if (isLoading) return
+    // Se não autenticado, enviar para login admin
+    if (!user) {
+      router.replace("/admin-login")
       return
     }
-    setIsAdminLoggedIn(true)
+    // Se autenticado, mas não admin, enviar para dashboard
+    if (!user.isAdmin) {
+      router.replace("/dashboard")
+      return
+    }
 
+    setIsAdminLoggedIn(true)
     const userModules = getModules()
     setModules(userModules)
-  }, [router])
+  }, [router, user, isLoading])
 
-  if (!isAdminLoggedIn) {
+  if (isLoading || !isAdminLoggedIn) {
     return null
   }
 
