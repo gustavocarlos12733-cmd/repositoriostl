@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createClient } from "@/lib/supabase/client"
+import { loginUser } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,49 +21,20 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim() || !password.trim()) return
+    if (!email.trim()) return
 
     setIsLoading(true)
     setError(null)
-    const supabase = createClient()
 
     try {
-      if (isSignUp) {
-        // Sign up new user
-        const { data, error } = await supabase.auth.signUp({
-          email: email.trim(),
-          password: password.trim(),
-          options: {
-            emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || `${window.location.origin}/dashboard`,
-            data: {
-              name: name.trim(),
-              user_type: "member",
-            },
-          },
-        })
-
-        if (error) throw error
-
-        if (data.user && !data.session) {
-          // Email confirmation required
-          setError("Verifique seu email para confirmar a conta antes de fazer login.")
-          setIsSignUp(false)
-        } else if (data.session) {
-          // Auto login after signup
-          router.push("/dashboard")
-        }
-      } else {
-        // Sign in existing user
-        const { error } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password: password.trim(),
-        })
-
-        if (error) throw error
-        router.push("/dashboard")
-      }
+      // Para login simples, apenas verifica se o email está preenchido
+      // O sistema local não requer senha real para usuários comuns
+      const user = loginUser(name.trim() || email.split('@')[0], email.trim())
+      
+      // Redireciona para o dashboard
+      router.push("/dashboard")
     } catch (error: any) {
-      setError(error.message || "Erro ao processar solicitação")
+      setError("Erro ao processar solicitação")
     } finally {
       setIsLoading(false)
     }
@@ -120,20 +91,21 @@ export default function LoginPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="password" className="text-white">
-                  Senha
-                </Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Sua senha"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-cyan-400"
-                  required
-                />
-              </div>
+              {isSignUp && (
+                <div className="space-y-2">
+                  <Label htmlFor="password" className="text-white">
+                    Senha (opcional)
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Sua senha (opcional)"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-cyan-400"
+                  />
+                </div>
+              )}
 
               {error && <div className="text-red-400 text-sm text-center">{error}</div>}
 
@@ -148,7 +120,7 @@ export default function LoginPage() {
                     : "Entrando..."
                   : isSignUp
                     ? "Criar Conta"
-                    : "Entrar na Área de Membros"}
+                    : "Acessar Área de Membros"}
               </Button>
 
               <div className="text-center">
