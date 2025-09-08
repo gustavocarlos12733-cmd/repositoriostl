@@ -31,9 +31,8 @@ export default function LoginPage() {
 
     try {
       if (isSignUp) {
-        const emailRedirectTo = typeof window !== "undefined"
-          ? new URL("/login", window.location.origin).toString()
-          : undefined
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? (typeof window !== "undefined" ? window.location.origin : undefined)
+        const emailRedirectTo = siteUrl ? new URL("/login", siteUrl).toString() : undefined
 
         const { error: signUpError } = await supabase.auth.signUp({
           email: email.trim(),
