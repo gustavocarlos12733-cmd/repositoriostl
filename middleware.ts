@@ -33,11 +33,30 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user && !request.nextUrl.pathname.startsWith("/login") && !request.nextUrl.pathname.startsWith("/auth")) {
+  const isAdminPath = request.nextUrl.pathname.startsWith("/admin")
+  const isAdminLogin = request.nextUrl.pathname.startsWith("/admin/login")
+
+  // Liberar páginas públicas de autenticação
+  if (
+    !user &&
+    !request.nextUrl.pathname.startsWith("/login") &&
+    !request.nextUrl.pathname.startsWith("/auth") &&
+    !isAdminLogin
+  ) {
     // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone()
-    url.pathname = "/login"
+    url.pathname = isAdminPath ? "/admin/login" : "/login"
     return NextResponse.redirect(url)
+  }
+
+  // Se rota administrativa, checar permissão de admin por email
+  if (isAdminPath && !isAdminLogin && user) {
+    const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL
+    if (adminEmail && user.email !== adminEmail) {
+      const url = request.nextUrl.clone()
+      url.pathname = "/dashboard"
+      return NextResponse.redirect(url)
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're

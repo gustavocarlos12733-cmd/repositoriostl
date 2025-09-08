@@ -86,7 +86,7 @@ export function Sidebar({ modules, userProgress }: SidebarProps) {
 
       {/* Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full w-80 bg-black border-r border-yellow-400/40 transform transition-transform duration-300 z-50 ${
+        className={`fixed left-0 top-0 h-full w-80 bg-black/90 backdrop-blur border-r border-yellow-400/40 transform transition-transform duration-300 z-50 lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -130,6 +130,34 @@ export function Sidebar({ modules, userProgress }: SidebarProps) {
               >
                 <Home className="h-4 w-4 mr-2" />
                 Dashboard
+              </Button>
+            </Link>
+          </div>
+
+          {/* Navegação principal */}
+          <div className="grid gap-2">
+            <Link href="/files" onClick={() => setIsOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800/50">
+                <FileText className="h-4 w-4 mr-2" />
+                Arquivos STL
+              </Button>
+            </Link>
+            <Link href="/progress" onClick={() => setIsOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800/50">
+                <Zap className="h-4 w-4 mr-2" />
+                Meu Progresso
+              </Button>
+            </Link>
+            <Link href="/support" onClick={() => setIsOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800/50">
+                <MessageCircle className="h-4 w-4 mr-2" />
+                Suporte
+              </Button>
+            </Link>
+            <Link href="/settings" onClick={() => setIsOpen(false)}>
+              <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800/50">
+                <Settings className="h-4 w-4 mr-2" />
+                Configurações
               </Button>
             </Link>
           </div>

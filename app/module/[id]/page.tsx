@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
+import { getModules } from "@/lib/auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -29,19 +30,30 @@ export default function ModulePage() {
 
   const loadModuleData = async () => {
     try {
-      const {
-        data: { user: authUser },
-      } = await supabase.auth.getUser()
+      // Primeiro, garantir sessão aplicada (evita redirecionamentos indevidos)
+      await supabase.auth.getSession()
+      const { data: userData } = await supabase.auth.getUser()
+      const authUser = userData.user
+      // Não redirecionar imediatamente; deixar o middleware proteger.
       if (!authUser) {
-        router.push("/login")
+        setUser(null)
+        setLoading(false)
         return
       }
 
       // Carregar perfil do usuário
       const { data: profile } = await supabase.from("profiles").select("*").eq("id", authUser.id).single()
 
-      // Carregar módulo
-      const { data: moduleData } = await supabase.from("modules").select("*").eq("id", params.id).single()
+      // Carregar módulo (fallback para dados locais quando tabela não existir)
+      let moduleData: any = null
+      try {
+        const { data } = await supabase.from("modules").select("*").eq("id", params.id).single()
+        moduleData = data
+      } catch {}
+      if (!moduleData) {
+        const local = getModules().find((m) => m.id === params.id)
+        moduleData = local ? { ...local, files: [] } : null
+      }
 
       // Carregar progresso do usuário para este módulo
       const { data: progressData } = await supabase
@@ -132,8 +144,16 @@ export default function ModulePage() {
   }
 
   if (!user) {
-    router.push("/login")
-    return null
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-white mb-4">Sessão não encontrada</h1>
+          <Link href="/login">
+            <Button className="bg-yellow-400 text-black hover:bg-yellow-300">Fazer login</Button>
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   if (!module) {

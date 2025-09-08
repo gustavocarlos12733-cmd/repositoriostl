@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import Image from "next/image"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import {
   Download,
   MessageCircle,
@@ -22,6 +24,9 @@ import Link from "next/link"
 import { Sidebar } from "@/components/sidebar"
 import { useAuth } from "@/contexts/auth-context"
 import { getModules } from "@/lib/auth"
+import { ThemeToggle } from "@/components/theme-toggle"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const getRankInfo = (completedModules: number) => {
   if (completedModules === 0) return { rank: "Iniciante", icon: Target, color: "text-gray-400", bgColor: "bg-gray-600" }
@@ -35,6 +40,8 @@ const getRankInfo = (completedModules: number) => {
 export default function DashboardPage() {
   const { user } = useAuth()
   const [modules, setModules] = useState<any[]>([])
+  const [query, setQuery] = useState("")
+  const [category, setCategory] = useState("all")
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -68,8 +75,13 @@ export default function DashboardPage() {
     )
   }
 
-  const completedModules = modules.filter((m) => m.isCompleted).length
-  const totalProgress = modules.length > 0 ? (completedModules / modules.length) * 100 : 0
+  const filtered = modules.filter((m) => {
+    const matchesQuery = query.trim().length === 0 || m.title.toLowerCase().includes(query.toLowerCase())
+    const matchesCat = category === "all" || m.category === category
+    return matchesQuery && matchesCat
+  })
+  const completedModules = filtered.filter((m) => m.isCompleted).length
+  const totalProgress = filtered.length > 0 ? (completedModules / filtered.length) * 100 : 0
   const rankInfo = getRankInfo(completedModules)
   const RankIcon = rankInfo.icon
 
@@ -77,7 +89,23 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-black">
       <Sidebar modules={modules} userProgress={[]} />
 
-      <div className="container mx-auto px-4 py-8 pl-20">
+      <div className="container mx-auto px-4 py-8 lg:pl-72">
+        {/* Header fixo */}
+        <div className="sticky top-0 z-40 -mx-4 px-4 py-3 bg-black/60 backdrop-blur border-b border-gray-800 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-yellow-400 font-bold">O CLUBE DO STL</span>
+            <span className="text-gray-500">/</span>
+            <span className="text-gray-300">Dashboard</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <Link href="/profile">
+              <Button variant="outline" className="border-gray-700 text-gray-300 bg-transparent hover:bg-gray-800">
+                Meu Perfil
+              </Button>
+            </Link>
+          </div>
+        </div>
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -94,6 +122,22 @@ export default function DashboardPage() {
               <div className="text-sm text-gray-400">
                 {completedModules}/{modules.length} módulos
               </div>
+            </div>
+          </div>
+
+          {/* Busca e filtros */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+            <div className="lg:col-span-2 flex gap-3">
+              <Input placeholder="Buscar módulos..." value={query} onChange={(e) => setQuery(e.target.value)} className="bg-gray-900 border-gray-700 text-white" />
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger className="w-48 bg-gray-900 border-gray-700 text-white">
+                  <SelectValue placeholder="Categoria" />
+                </SelectTrigger>
+                <SelectContent className="bg-gray-900 text-white border-gray-700">
+                  <SelectItem value="all">Todas</SelectItem>
+                  <SelectItem value="ARQUIVOS STL">Arquivos STL</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -185,20 +229,25 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {modules.map((module) => (
+                  {filtered.map((module) => (
                     <Link key={module.id} href={`/module/${module.id}`}>
-                      <div className="p-4 bg-gray-800/50 rounded-lg border border-yellow-400/20 hover:border-yellow-400/40 transition-all cursor-pointer group">
-                        <div className="flex items-center justify-between mb-2">
-                          <FileText className="h-5 w-5 text-cyan-400" />
-                          {module.isCompleted && <Badge className="bg-green-600 text-white">Concluído</Badge>}
+                      <div className="p-0 overflow-hidden rounded-lg border border-yellow-400/20 hover:border-yellow-400/40 transition-all cursor-pointer group bg-gradient-to-br from-gray-900/80 to-gray-800/60">
+                        <div className="relative h-36 w-full">
+                          <Image src="/placeholder.jpg" alt={module.title} fill className="object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                         </div>
-                        <h3 className="text-white font-medium text-sm mb-1 group-hover:text-cyan-400 transition-colors">
-                          {module.title}
-                        </h3>
-                        <p className="text-gray-400 text-xs mb-2 line-clamp-2">{module.description}</p>
-                        <div className="flex items-center justify-between">
-                          <Progress value={module.isCompleted ? 100 : module.progress} className="h-1 flex-1 mr-2" />
-                          <ChevronRight className="h-4 w-4 text-gray-500 group-hover:text-cyan-400 transition-colors" />
+                        <div className="p-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <FileText className="h-5 w-5 text-cyan-400" />
+                            {module.isCompleted && <Badge className="bg-green-600 text-white">Concluído</Badge>}
+                          </div>
+                          <h3 className="text-white font-medium text-sm mb-1 group-hover:text-cyan-400 transition-colors">
+                            {module.title}
+                          </h3>
+                          <p className="text-gray-400 text-xs mb-2 line-clamp-2">{module.description}</p>
+                          <div className="flex items-center justify-between">
+                            <Progress value={module.isCompleted ? 100 : module.progress} className="h-1 flex-1 mr-2" />
+                            <ChevronRight className="h-4 w-4 text-gray-500 group-hover:text-cyan-400 transition-colors" />
+                          </div>
                         </div>
                       </div>
                     </Link>
