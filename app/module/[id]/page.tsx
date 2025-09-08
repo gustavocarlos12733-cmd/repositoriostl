@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, CheckCircle, MessageCircle, Download, Eye, FileText } from "lucide-react"
+import { ArrowLeft, CheckCircle, MessageCircle, Download, Eye, FileText, ExternalLink } from "lucide-react"
 import Link from "next/link"
 
 export default function ModulePage() {
@@ -171,6 +171,37 @@ export default function ModulePage() {
 
   const isCompleted = userProgress?.completed || false
   const files = module.files || []
+  const driveLinks: Record<string, { desc: string; href: string }> = {
+    "stl-zodiaco": {
+      desc: "CLIQUE ABAIXO PARA ACESSAR O CLUBE DO STL CAVALEIROS DO ZODÍACO",
+      href: "https://drive.google.com/drive/folders/12or0Y2Fw_WqB_L3XjC1kOM9fdlf7OHK4?usp=sharing",
+    },
+    "stl-desenhos-gerais": {
+      desc: "CLIQUE ABAIXO PARA ACESSAR O CLUBE STL DESENHOS",
+      href: "https://drive.google.com/drive/folders/18Q0ssXpNMZh9HJmTKnq0IuCYJ9Cs34FT?usp=sharing",
+    },
+    "stl-mini-mundo": {
+      desc: "CLIQUE ABAIXO PARA ACESSAR O CLUBE STL MINI MUNDO",
+      href: "https://drive.com/drive/folders/1mWF_AvZhO77JB8Zsg6M6rEItnXBxIqTE?usp=sharing",
+    },
+    "stl-rpg": {
+      desc: "CLIQUE ABAIXO PARA ACESSAR O CLUBE STL RPG",
+      href: "https://drive.google.com/drive/folders/1QFEglgxD89-NVyZbYzQGJdPVLvbKJBxl?usp=sharing",
+    },
+    "stl-personalidades": {
+      desc: "CLIQUE ABAIXO PARA ACESSAR O CLUBE CELEBRIDADES E PERSONALIDADES",
+      href: "https://drive.google.com/drive/folders/1EfoaOYmdUMgVEKFDoyxTYR01BLxZEhMr?usp=sharing",
+    },
+    "stl-cenarios": {
+      desc: "CLIQUE ABAIXO PARA ACESSAR O CLUBE STL CENÁRIOS",
+      href: "https://drive.google.com/drive/folders/16f1JCFj1Id_SO9R0zcR4wVyr5vUC3im0?usp=sharing",
+    },
+    "stl-religiao-urbana": {
+      desc: "CLIQUE ABAIXO PARA ACESSAR O CLUBE STL IMPRESSÃO 3D UMBANDA OXALA EXU OGUM OXUM ORIXA OYA",
+      href: "https://drive.google.com/drive/folders/1x4ubg_swo3v5J1cPPLI72_5v-sy40X8g?usp=sharing",
+    },
+  }
+  const drive = driveLinks[String(params.id)]
 
   return (
     <div className="min-h-screen bg-black">
@@ -247,7 +278,7 @@ export default function ModulePage() {
                     {module.content || "Conteúdo em desenvolvimento..."}
                   </div>
 
-                  <div className="mt-8 p-6 bg-gray-800/50 rounded-lg border border-yellow-400/20">
+                  <div className="mt-8 p-6 bg-gray-800/50 rounded-lg border border-yellow-400/20 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
                       <Download className="h-5 w-5 text-cyan-400" />
                       Arquivos STL Disponíveis
@@ -270,6 +301,17 @@ export default function ModulePage() {
                         <FileText className="h-8 w-8 text-gray-600 mx-auto mb-2" />
                         <p className="text-gray-500 text-sm">Nenhum arquivo disponível ainda</p>
                         <p className="text-gray-600 text-xs">Os arquivos serão adicionados em breve</p>
+                        {drive && (
+                          <div className="mt-4">
+                            <p className="text-sm text-gray-300 mb-2">{drive.desc}</p>
+                            <a href={drive.href} target="_blank" rel="noreferrer">
+                              <Button className="bg-[var(--brand-accent)] hover:opacity-90 text-black">
+                                Abrir no Google Drive
+                                <ExternalLink className="h-4 w-4 ml-2" />
+                              </Button>
+                            </a>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

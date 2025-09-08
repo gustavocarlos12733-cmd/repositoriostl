@@ -91,7 +91,7 @@ export default function DashboardPage() {
 
       <div className="container mx-auto px-4 py-8 lg:pl-72">
         {/* Header fixo */}
-        <div className="sticky top-0 z-40 -mx-4 px-4 py-3 bg-black/60 backdrop-blur border-b border-gray-800 flex items-center justify-between">
+        <div className="sticky top-0 z-40 -mx-4 px-4 py-3 bg-[var(--bg-dark)]/70 backdrop-blur border-b border-[var(--border)] flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-yellow-400 font-bold">O CLUBE DO STL</span>
             <span className="text-gray-500">/</span>
@@ -100,7 +100,7 @@ export default function DashboardPage() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <Link href="/profile">
-              <Button variant="outline" className="border-gray-700 text-gray-300 bg-transparent hover:bg-gray-800">
+              <Button variant="outline" className="border-[var(--border)] text-gray-300 bg-transparent hover:bg-gray-800">
                 Meu Perfil
               </Button>
             </Link>
@@ -142,7 +142,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <Card className="bg-gray-900/50 border border-yellow-400/40">
+            <Card className="card-gradient border border-[var(--border)]">
               <CardHeader>
                 <CardTitle className="text-white">Progresso Geral</CardTitle>
               </CardHeader>
@@ -159,7 +159,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-900/50 border border-yellow-400/40">
+            <Card className="card-gradient border border-[var(--border)]">
               <CardHeader>
                 <CardTitle className="text-white">Estatísticas</CardTitle>
               </CardHeader>
@@ -183,7 +183,7 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-900/50 border border-yellow-400/40">
+            <Card className="card-gradient border border-[var(--border)]">
               <CardHeader>
                 <CardTitle className="text-white">Ranking de Conquistas</CardTitle>
               </CardHeader>
@@ -217,7 +217,7 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <Card className="bg-gray-900/50 border border-yellow-400/40">
+            <Card className="card-gradient border border-[var(--border)]">
               <CardHeader>
                 <CardTitle className="text-red-600 flex items-center gap-2">
                   <Download className="h-6 w-6" />

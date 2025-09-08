@@ -4,80 +4,46 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Paleta atualizada */
+  --bg-dark: #1A202C; /* azul escuro */
+  --bg-surface: #2D3748; /* cinza chumbo */
+  --text-primary: #E2E8F0;
+  --text-inverse: #0f1115;
+  --brand-accent: #48BB78; /* verde água */
+  --brand-accent-2: #805AD5; /* roxo sutil */
 
-  /* Cores personalizadas do STL Club */
-  --stl-yellow: oklch(0.9 0.15 85);
-  --stl-neon-red: oklch(0.5 0.4 15); /* Vermelho sangue mais forte */
-  --stl-cyan: oklch(0.7 0.2 200);
-  --stl-black: oklch(0 0 0);
+  --background: var(--bg-dark);
+  --foreground: var(--text-primary);
+  --card: var(--bg-surface);
+  --card-foreground: var(--text-primary);
+  --popover: var(--bg-surface);
+  --popover-foreground: var(--text-primary);
+  --primary: var(--brand-accent);
+  --primary-foreground: #0b1410;
+  --secondary: #273043;
+  --secondary-foreground: var(--text-primary);
+  --muted: #273043;
+  --muted-foreground: #A0AEC0;
+  --accent: #273043;
+  --accent-foreground: var(--text-primary);
+  --destructive: #E53E3E;
+  --destructive-foreground: #FFF5F5;
+  --border: #3B455A;
+  --input: #3B455A;
+  --ring: #4FD1C5;
+  --radius: 0.625rem;
+  --sidebar: var(--bg-surface);
+  --sidebar-foreground: var(--text-primary);
+  --sidebar-primary: var(--brand-accent);
+  --sidebar-primary-foreground: #0b1410;
+  --sidebar-accent: #273043;
+  --sidebar-accent-foreground: var(--text-primary);
+  --sidebar-border: #3B455A;
+  --sidebar-ring: #4FD1C5;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  /* já usamos as variáveis de :root para o tema escuro */
 }
 
 @theme inline {
@@ -129,36 +95,7 @@
   }
 }
 
-/* Animações neon */
-.neon-glow {
-  text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor;
-}
-
-.neon-border {
-  box-shadow: 0 0 5px currentColor, 0 0 10px currentColor, inset 0 0 5px currentColor;
-}
-
-/* Adicionando efeitos neon mais suaves */
-.neon-glow-soft {
-  text-shadow: 0 0 3px currentColor, 0 0 6px currentColor;
-}
-
-.neon-border-soft {
-  box-shadow: 0 0 3px currentColor, 0 0 6px currentColor;
-}
-
-/* Adicionando contornos amarelos suaves */
-.yellow-outline {
-  border: 1px solid #ffd700;
-  box-shadow: 0 0 2px rgba(255, 215, 0, 0.5);
-}
-
-.yellow-outline-soft {
-  border: 1px solid rgba(255, 215, 0, 0.6);
-  box-shadow: 0 0 1px rgba(255, 215, 0, 0.4);
-}
-
-/* Gradientes personalizados */
-.gradient-stl {
-  background: linear-gradient(135deg, var(--stl-neon-red), var(--stl-cyan));
+/* Remoção de neon; gradientes discretos */
+.card-gradient {
+  background: linear-gradient(180deg, rgba(45,55,72,0.9), rgba(26,32,44,0.9));
 }

@@ -16,7 +16,9 @@ export default function SupportPage() {
           <CardContent className="space-y-3">
             <Input placeholder="Assunto" className="bg-gray-900 border-gray-700 text-white" />
             <Input placeholder="Descrição" className="bg-gray-900 border-gray-700 text-white" />
-            <Button className="bg-cyan-500 hover:bg-cyan-500/80 text-black">Enviar</Button>
+            <a href="https://wa.me/5519982479541" target="_blank" rel="noreferrer">
+              <Button className="bg-[var(--brand-accent)] hover:opacity-90 text-black">Abrir Ticket no WhatsApp</Button>
+            </a>
           </CardContent>
         </Card>
       </div>
