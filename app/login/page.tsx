@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
   const [isSignUp, setIsSignUp] = useState(false)
   const router = useRouter()
 
@@ -28,25 +29,30 @@ export default function LoginPage() {
 
     setIsLoading(true)
     setError(null)
+    setSuccess(null)
 
     try {
       const supabase = createClient()
 
       if (isSignUp) {
+        const emailRedirectTo = typeof window !== "undefined"
+          ? new URL("/login", window.location.origin).toString()
+          : undefined
+
         const { error: signUpError } = await supabase.auth.signUp({
           email: email.trim(),
           password: password.trim(),
           options: {
             data: name.trim() ? { name: name.trim() } : undefined,
+            emailRedirectTo,
           },
         })
         if (signUpError) throw signUpError
-        // Após cadastro, também tentar login para entrar direto
-        const { error: loginAfterSignUpError } = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password: password.trim(),
-        })
-        if (loginAfterSignUpError) throw loginAfterSignUpError
+
+        // Não tentar login automático quando confirmação por e-mail é exigida
+        setSuccess("Email de confirmação enviado. Verifique sua caixa de entrada e confirme para acessar. Após confirmar, você será redirecionado para a página de login.")
+        setIsSignUp(false)
+        return
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: email.trim(),
@@ -132,6 +138,7 @@ export default function LoginPage() {
                 />
               </div>
 
+              {success && <div className="text-green-400 text-sm text-center">{success}</div>}
               {error && <div className="text-red-400 text-sm text-center">{error}</div>}
 
               <Button

@@ -16,6 +16,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [success, setSuccess] = useState("")
+  const [isSignUp, setIsSignUp] = useState(false)
   const router = useRouter()
   const supabase = createClient()
 
@@ -23,22 +25,45 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError("")
+    setSuccess("")
 
-    console.log("[v0] Tentando fazer login com:", email)
+    console.log("[v0] Tentando autenticar:", email, isSignUp ? "(signup)" : "(login)")
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+      if (isSignUp) {
+        const emailRedirectTo = typeof window !== "undefined"
+          ? new URL("/login", window.location.origin).toString()
+          : undefined
 
-      if (error) {
-        console.log("[v0] Erro no login:", error.message)
-        setError(error.message)
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: email.trim(),
+          password: password.trim(),
+          options: {
+            emailRedirectTo,
+          },
+        })
+
+        if (signUpError) {
+          console.log("[v0] Erro no signup:", signUpError.message)
+          setError(signUpError.message)
+        } else {
+          setSuccess("Email de confirmação enviado. Verifique sua caixa de entrada. Após confirmar, você será redirecionado para a página de login.")
+          setIsSignUp(false)
+        }
       } else {
-        console.log("[v0] Login bem-sucedido:", data.user?.email)
-        router.push("/dashboard")
-        router.refresh()
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+
+        if (error) {
+          console.log("[v0] Erro no login:", error.message)
+          setError(error.message)
+        } else {
+          console.log("[v0] Login bem-sucedido:", data.user?.email)
+          router.push("/dashboard")
+          router.refresh()
+        }
       }
     } catch (err) {
       console.log("[v0] Erro inesperado:", err)
@@ -52,11 +77,18 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle>Login - STL Club</CardTitle>
-          <CardDescription>Entre com suas credenciais para acessar o sistema</CardDescription>
+          <CardTitle>{isSignUp ? "Criar conta - STL Club" : "Login - STL Club"}</CardTitle>
+          <CardDescription>
+            {isSignUp ? "Crie sua conta para acessar o sistema (confirmação por e-mail)" : "Entre com suas credenciais para acessar o sistema"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
+            {success && (
+              <Alert>
+                <AlertDescription>{success}</AlertDescription>
+              </Alert>
+            )}
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
@@ -88,8 +120,22 @@ export default function LoginPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Entrando..." : "Entrar"}
+              {loading ? (isSignUp ? "Criando conta..." : "Entrando...") : isSignUp ? "Criar conta" : "Entrar"}
             </Button>
+
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsSignUp(!isSignUp)
+                  setError("")
+                  setSuccess("")
+                }}
+                className="text-sm underline text-gray-600"
+              >
+                {isSignUp ? "Já tem conta? Fazer login" : "Não tem conta? Criar agora"}
+              </button>
+            </div>
           </form>
         </CardContent>
       </Card>
