@@ -47,6 +47,13 @@ export function Sidebar({ modules, userProgress }: SidebarProps) {
 
   useEffect(() => {
     loadUser()
+    if (typeof window !== "undefined") {
+      const mq = window.matchMedia("(min-width: 1024px)")
+      const sync = () => setIsOpen(mq.matches)
+      sync()
+      mq.addEventListener("change", sync)
+      return () => mq.removeEventListener("change", sync)
+    }
   }, [])
 
   const loadUser = async () => {
@@ -54,8 +61,19 @@ export function Sidebar({ modules, userProgress }: SidebarProps) {
       data: { user: authUser },
     } = await supabase.auth.getUser()
     if (authUser) {
-      const { data: profile } = await supabase.from("profiles").select("*").eq("id", authUser.id).single()
-      setUser(profile)
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", authUser.id)
+        .maybeSingle()
+
+      const fallbackUser = {
+        id: authUser.id,
+        name: (authUser.user_metadata as any)?.name ?? authUser.email ?? "Usuário",
+        email: authUser.email ?? "",
+      }
+
+      setUser(profile ?? fallbackUser)
     }
   }
 
@@ -72,23 +90,24 @@ export function Sidebar({ modules, userProgress }: SidebarProps) {
 
   return (
     <>
-      {/* Menu Button */}
+      {/* Menu Button (mobile) */}
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed top-4 left-4 z-50 bg-gray-900/90 border border-yellow-400/40 hover:border-yellow-400/60 text-yellow-400"
+        className="lg:hidden fixed top-4 left-4 z-50 bg-gray-900/90 border border-yellow-400/40 hover:border-yellow-400/60 text-yellow-400"
         size="icon"
+        aria-label="Abrir menu"
       >
         <Menu className="h-5 w-5" />
       </Button>
 
-      {/* Overlay */}
-      {isOpen && <div className="fixed inset-0 bg-black/50 z-40" onClick={() => setIsOpen(false)} />}
+      {/* Overlay (mobile) */}
+      {isOpen && <div className="lg:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setIsOpen(false)} />}
 
       {/* Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full w-80 bg-black/90 backdrop-blur border-r border-yellow-400/40 transform transition-transform duration-300 z-50 lg:translate-x-0 ${
+        className={`fixed left-0 top-0 h-full w-72 lg:w-80 bg-black/90 backdrop-blur border-r border-yellow-400/40 transform transition-transform duration-300 z-50 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        } lg:translate-x-0 flex flex-col overflow-hidden`}
       >
         <div className="p-4 border-b border-gray-800">
           <div className="flex items-center justify-between mb-4">
@@ -97,7 +116,8 @@ export function Sidebar({ modules, userProgress }: SidebarProps) {
               onClick={() => setIsOpen(false)}
               variant="ghost"
               size="icon"
-              className="text-gray-400 hover:text-white"
+              className="lg:hidden text-gray-400 hover:text-white"
+              aria-label="Fechar menu"
             >
               <X className="h-5 w-5" />
             </Button>
@@ -135,31 +155,51 @@ export function Sidebar({ modules, userProgress }: SidebarProps) {
           </div>
 
           {/* Navegação principal */}
-          <div className="grid gap-2">
-            <Link href="/files" onClick={() => setIsOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800/50">
-                <FileText className="h-4 w-4 mr-2" />
-                Arquivos STL
-              </Button>
-            </Link>
-            <Link href="/progress" onClick={() => setIsOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800/50">
-                <Zap className="h-4 w-4 mr-2" />
-                Meu Progresso
-              </Button>
-            </Link>
-            <Link href="/support" onClick={() => setIsOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800/50">
-                <MessageCircle className="h-4 w-4 mr-2" />
-                Suporte
-              </Button>
-            </Link>
-            <Link href="/settings" onClick={() => setIsOpen(false)}>
-              <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800/50">
-                <Settings className="h-4 w-4 mr-2" />
-                Configurações
-              </Button>
-            </Link>
+          <div className="grid gap-2 pb-3 mb-3 border-b border-gray-800">
+            <div className="grid gap-2">
+              <Link href="/files" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800/50">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Arquivos STL
+                </Button>
+              </Link>
+              <Link href="/updates" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800/50">
+                  <Star className="h-4 w-4 mr-2" />
+                  Atualizações
+                </Button>
+              </Link>
+              <Link href="/purchases" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800/50">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Compras e Assinaturas
+                </Button>
+              </Link>
+              <Link href="/refunds" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800/50">
+                  <ChevronRight className="h-4 w-4 mr-2" />
+                  Reembolso
+                </Button>
+              </Link>
+              <Link href="/progress" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800/50">
+                  <Zap className="h-4 w-4 mr-2" />
+                  Meu Progresso
+                </Button>
+              </Link>
+              <Link href="/support" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800/50">
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  Suporte
+                </Button>
+              </Link>
+              <Link href="/settings" onClick={() => setIsOpen(false)}>
+                <Button variant="ghost" className="w-full justify-start text-gray-300 hover:text-white hover:bg-gray-800/50">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Configurações
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* ARQUIVOS STL com dados reais */}
@@ -168,7 +208,7 @@ export function Sidebar({ modules, userProgress }: SidebarProps) {
               <Download className="h-4 w-4" />
               ARQUIVOS STL
             </h3>
-            <div className="space-y-2 max-h-96 overflow-y-auto">
+            <div className="space-y-2">
               {modules
                 .filter((m) => m.category === "ARQUIVOS STL")
                 .map((module) => {
@@ -200,18 +240,22 @@ export function Sidebar({ modules, userProgress }: SidebarProps) {
               CANAL SUPORTE STL
             </h3>
             <div className="space-y-2">
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-sm text-gray-300 hover:text-cyan-400 hover:bg-gray-800/50"
-              >
-                Suporte Técnico
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-sm text-gray-300 hover:text-cyan-400 hover:bg-gray-800/50"
-              >
-                FAQ
-              </Button>
+              <Link href="/support" onClick={() => setIsOpen(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-sm text-gray-300 hover:text-cyan-400 hover:bg-gray-800/50"
+                >
+                  Suporte Técnico
+                </Button>
+              </Link>
+              <Link href="/faq" onClick={() => setIsOpen(false)}>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-sm text-gray-300 hover:text-cyan-400 hover:bg-gray-800/50"
+                >
+                  FAQ
+                </Button>
+              </Link>
             </div>
           </div>
 

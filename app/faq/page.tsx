@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import BackToDashboard from "@/components/back-to-dashboard"
 
 export default function FaqPage() {
   const sections = [
@@ -34,6 +35,7 @@ export default function FaqPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="container mx-auto px-4 py-8">
+        <div className="mb-4"><BackToDashboard /></div>
         <h1 className="text-2xl font-bold text-yellow-400 mb-4">FAQ</h1>
         {sections.map((sec, idx) => (
           <Card key={idx} className="bg-gray-900/60 border-gray-700 mb-6">

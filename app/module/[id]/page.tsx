@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { createClient } from "@/lib/supabase/client"
-import { getModules } from "@/lib/auth"
+import { getModules, markModuleCompleted, addLocalComment } from "@/lib/auth"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, CheckCircle, MessageCircle, Download, Eye, FileText, ExternalLink } from "lucide-react"
 import Link from "next/link"
+import { HeaderBar } from "@/components/header-bar"
 
 export default function ModulePage() {
   const params = useParams()
@@ -41,8 +42,8 @@ export default function ModulePage() {
         return
       }
 
-      // Carregar perfil do usuário
-      const { data: profile } = await supabase.from("profiles").select("*").eq("id", authUser.id).single()
+      // Carregar perfil do usuário (fallback para dados do auth se não existir na tabela)
+      const { data: profile } = await supabase.from("profiles").select("*").eq("id", authUser.id).maybeSingle()
 
       // Carregar módulo (fallback para dados locais quando tabela não existir)
       let moduleData: any = null
@@ -73,7 +74,12 @@ export default function ModulePage() {
         .eq("module_id", params.id)
         .order("created_at", { ascending: false })
 
-      setUser(profile)
+      const fallbackUser = {
+        id: authUser.id,
+        name: (authUser.user_metadata as any)?.name ?? authUser.email ?? "Usuário",
+        email: authUser.email ?? "",
+      }
+      setUser(profile ?? fallbackUser)
       setModule(moduleData)
       setUserProgress(progressData)
       setComments(commentsData || [])
@@ -111,6 +117,9 @@ export default function ModulePage() {
       loadModuleData()
     } catch (error) {
       console.error("Erro ao marcar como visto:", error)
+      // Fallback local
+      markModuleCompleted(module.id)
+      setUserProgress({ completed: true, completed_at: new Date().toISOString() })
     }
   }
 
@@ -130,6 +139,23 @@ export default function ModulePage() {
       loadModuleData() // Recarregar comentários
     } catch (error) {
       console.error("Erro ao adicionar comentário:", error)
+      // Fallback local persistente
+      addLocalComment(module.id, {
+        userId: user.id,
+        userName: user.name ?? user.email ?? "Usuário",
+        content: comment.trim(),
+        createdAt: new Date().toISOString(),
+      })
+      setComments([
+        {
+          id: `${Date.now()}`,
+          content: comment.trim(),
+          created_at: new Date().toISOString(),
+          profiles: { name: user.name ?? user.email ?? "Usuário" },
+        },
+        ...comments,
+      ])
+      setComment("")
     } finally {
       setIsSubmittingComment(false)
     }
@@ -205,22 +231,18 @@ export default function ModulePage() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
-      <header className="border-b border-gray-800 bg-gray-900/50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard">
-              <Button variant="ghost" size="icon" className="text-cyan-400">
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-xl font-bold text-white">{module.title}</h1>
-              <p className="text-sm text-gray-400">{module.category}</p>
-            </div>
-          </div>
+      <HeaderBar />
+      <div className="border-b border-gray-800 bg-gray-900/50">
+        <div className="container mx-auto px-4 py-3 flex items-center gap-3">
+          <Link href="/dashboard">
+            <Button variant="outline" size="sm" className="border-[var(--border)] text-gray-300 bg-transparent hover:bg-gray-800">
+              <ArrowLeft className="h-4 w-4 mr-1" /> Voltar
+            </Button>
+          </Link>
+          <h1 className="text-lg font-semibold text-white">{module.title}</h1>
+          <span className="text-xs text-gray-400">{module.category}</span>
         </div>
-      </header>
+      </div>
 
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

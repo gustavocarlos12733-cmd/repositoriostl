@@ -123,3 +123,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Responsividade global quando o sidebar está fixo com 320px (w-80) */
+@media (max-width: 1024px) {
+  .min-h-screen.pl-80, .min-h-screen.lg\:pl-80 {
+    padding-left: 0 !important;
+  }
+}

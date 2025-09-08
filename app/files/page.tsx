@@ -1,17 +1,21 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { getModules } from "@/lib/auth"
+import { getModules, clearOldLocalData } from "@/lib/auth"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
+import Link from "next/link"
+import BackToDashboard from "@/components/back-to-dashboard"
 
 export default function FilesPage() {
   const [modules, setModules] = useState<any[]>([])
   const [q, setQ] = useState("")
 
   useEffect(() => {
+    // Limpar dados antigos do localStorage para garantir que todos vejam as atualizações
+    clearOldLocalData()
     setModules(getModules())
   }, [])
 
@@ -28,6 +32,7 @@ export default function FilesPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="container mx-auto px-4 py-8">
+        <div className="mb-4"><BackToDashboard /></div>
         <h1 className="text-2xl font-bold text-yellow-400 mb-4">Arquivos STL</h1>
 
         <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -52,20 +57,22 @@ export default function FilesPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((m) => (
-            <Card key={m.id} className="bg-gray-900/60 border-gray-700 overflow-hidden">
-              <div className="relative h-36 w-full">
-                <Image src="/placeholder.jpg" alt={m.title} fill className="object-cover" />
-              </div>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm text-white">{m.title}</CardTitle>
-                  <Badge variant="outline" className="border-cyan-500 text-cyan-400">{m.category}</Badge>
+            <Link key={m.id} href={`/module/${m.id}`} className="group">
+              <Card className="bg-gray-900/60 border-gray-700 overflow-hidden transition-colors group-hover:border-yellow-400/40 cursor-pointer">
+                <div className="relative h-36 w-full">
+                  <Image src="/placeholder.jpg" alt={m.title} fill className="object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
                 </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xs text-gray-400 line-clamp-2">{m.description}</p>
-              </CardContent>
-            </Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-sm text-white group-hover:text-cyan-400 transition-colors">{m.title}</CardTitle>
+                    <Badge variant="outline" className="border-cyan-500 text-cyan-400">{m.category}</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-xs text-gray-400 line-clamp-2">{m.description}</p>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
       </div>

@@ -7,10 +7,13 @@ import { Users, MessageCircle, Crown, Zap } from "lucide-react"
 import { Sidebar } from "@/components/sidebar"
 import { getModules } from "@/lib/auth"
 import { useState, useEffect } from "react"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import BackToDashboard from "@/components/back-to-dashboard"
 
 export default function WhatsAppGroupPage() {
   const { user } = useAuth()
   const [modules, setModules] = useState<any[]>([])
+  const [open, setOpen] = useState(false)
 
   useEffect(() => {
     setModules(getModules())
@@ -20,9 +23,10 @@ export default function WhatsAppGroupPage() {
 
   return (
     <div className="min-h-screen bg-black">
-      <Sidebar modules={modules} />
+      <Sidebar modules={modules} userProgress={[]} />
 
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="mb-4"><BackToDashboard /></div>
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-yellow-400 mb-2">GRUPO WHATSAPP O CLUBE STL</h1>
@@ -119,7 +123,7 @@ export default function WhatsAppGroupPage() {
 
             {/* Botão de Assinatura */}
             <div className="text-center">
-              <Button className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 text-lg">
+              <Button onClick={() => setOpen(true)} className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8 py-3 text-lg">
                 <Zap className="h-5 w-5 mr-2" />
                 Assinar Grupo VIP - R$ 9,90/mês
               </Button>
@@ -151,6 +155,23 @@ export default function WhatsAppGroupPage() {
           </CardContent>
         </Card>
       </div>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="bg-gray-900 border border-yellow-400/40">
+          <DialogHeader>
+            <DialogTitle className="text-yellow-400">Assinatura do Grupo VIP</DialogTitle>
+            <DialogDescription className="text-gray-300">
+              Em breve conectaremos o checkout para concluir a assinatura de R$ 9,90/mês.
+              Se tiver dúvidas, acesse Suporte e fale com a equipe.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center justify-end gap-2">
+            <a href="/support">
+              <Button variant="outline" className="border-cyan-500 text-cyan-400 bg-transparent hover:bg-cyan-500/10">Ir ao Suporte</Button>
+            </a>
+            <Button onClick={() => setOpen(false)} className="bg-yellow-400 text-black hover:bg-yellow-500">Entendi</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -23,8 +23,8 @@ import {
 import Link from "next/link"
 import { Sidebar } from "@/components/sidebar"
 import { useAuth } from "@/contexts/auth-context"
-import { getModules } from "@/lib/auth"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { getModules, clearOldLocalData } from "@/lib/auth"
+import { HeaderBar } from "@/components/header-bar"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
@@ -45,6 +45,9 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Limpar dados antigos do localStorage para garantir que todos vejam as atualizações
+    clearOldLocalData()
+    
     const loadedModules = getModules()
     setModules(loadedModules)
     setLoading(false)
@@ -89,23 +92,9 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-black">
       <Sidebar modules={modules} userProgress={[]} />
 
-      <div className="container mx-auto px-4 py-8 lg:pl-72">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {/* Header fixo */}
-        <div className="sticky top-0 z-40 -mx-4 px-4 py-3 bg-[var(--bg-dark)]/70 backdrop-blur border-b border-[var(--border)] flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-yellow-400 font-bold">O CLUBE DO STL</span>
-            <span className="text-gray-500">/</span>
-            <span className="text-gray-300">Dashboard</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <Link href="/profile">
-              <Button variant="outline" className="border-[var(--border)] text-gray-300 bg-transparent hover:bg-gray-800">
-                Meu Perfil
-              </Button>
-            </Link>
-          </div>
-        </div>
+        <HeaderBar />
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -126,11 +115,11 @@ export default function DashboardPage() {
           </div>
 
           {/* Busca e filtros */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-            <div className="lg:col-span-2 flex gap-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="md:col-span-2 flex gap-3">
               <Input placeholder="Buscar módulos..." value={query} onChange={(e) => setQuery(e.target.value)} className="bg-gray-900 border-gray-700 text-white" />
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger className="w-48 bg-gray-900 border-gray-700 text-white">
+                <SelectTrigger className="w-full md:w-48 bg-gray-900 border-gray-700 text-white">
                   <SelectValue placeholder="Categoria" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-900 text-white border-gray-700">
@@ -273,18 +262,22 @@ export default function DashboardPage() {
                   <div className="p-4 bg-gray-800/50 rounded-lg border border-yellow-400/20">
                     <h4 className="text-white font-medium mb-2">Suporte Técnico</h4>
                     <p className="text-gray-400 text-sm mb-3">Problemas com impressão ou arquivos STL</p>
-                    <Button className="w-full bg-cyan-500 hover:bg-cyan-500/80 text-black">Abrir Ticket</Button>
+                    <a href="https://wa.me/5519982479541" target="_blank" rel="noreferrer">
+                      <Button className="w-full bg-cyan-500 hover:bg-cyan-500/80 text-black">Falar com Suporte</Button>
+                    </a>
                   </div>
 
                   <div className="p-4 bg-gray-800/50 rounded-lg border border-yellow-400/20">
                     <h4 className="text-white font-medium mb-2">FAQ</h4>
                     <p className="text-gray-400 text-sm mb-3">Perguntas frequentes e tutoriais</p>
-                    <Button
-                      variant="outline"
-                      className="w-full border-cyan-500 text-cyan-400 bg-transparent hover:bg-cyan-500/10"
-                    >
-                      Ver FAQ
-                    </Button>
+                    <Link href="/faq">
+                      <Button
+                        variant="outline"
+                        className="w-full border-cyan-500 text-cyan-400 bg-transparent hover:bg-cyan-500/10"
+                      >
+                        Ver FAQ
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </CardContent>

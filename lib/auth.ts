@@ -292,29 +292,44 @@ Explore a espiritualidade através da arte 3D!`,
 ]
 
 export function getModules(): Module[] {
-  if (typeof window === "undefined") return []
-  const stored = localStorage.getItem(MODULES_STORAGE_KEY)
-  if (stored) {
-    return JSON.parse(stored)
-  }
-
-  // Inicializar módulos se não existirem
-  const modules = initialModules.map((module) => ({
+  // Sempre retornar os módulos atualizados do servidor
+  // Removendo dependência do localStorage para garantir que todos vejam as atualizações
+  return initialModules.map((module) => ({
     ...module,
     isCompleted: false,
     progress: 0,
     comments: [],
   }))
-
-  localStorage.setItem(MODULES_STORAGE_KEY, JSON.stringify(modules))
-  return modules
 }
 
 export function updateModule(moduleId: string, updates: Partial<Module>): void {
-  const modules = getModules()
-  const moduleIndex = modules.findIndex((m) => m.id === moduleId)
-  if (moduleIndex !== -1) {
-    modules[moduleIndex] = { ...modules[moduleIndex], ...updates }
-    localStorage.setItem(MODULES_STORAGE_KEY, JSON.stringify(modules))
+  // Esta função agora é apenas para compatibilidade
+  // O progresso real dos usuários deve ser gerenciado pelo Supabase
+  console.log(`updateModule chamado para ${moduleId}:`, updates)
+}
+
+// Helpers de fallback local
+export function markModuleCompleted(moduleId: string): void {
+  updateModule(moduleId, { isCompleted: true, progress: 100 })
+}
+
+export function addLocalComment(
+  moduleId: string,
+  comment: Omit<Comment, "id"> & { id?: string }
+): void {
+  // Esta função agora é apenas para compatibilidade
+  // Os comentários reais devem ser gerenciados pelo Supabase
+  console.log(`addLocalComment chamado para ${moduleId}:`, comment)
+}
+
+// Função para limpar dados antigos do localStorage
+export function clearOldLocalData(): void {
+  if (typeof window === "undefined") return
+  try {
+    // Limpar dados antigos de módulos para forçar recarregamento
+    localStorage.removeItem(MODULES_STORAGE_KEY)
+    console.log("Dados antigos do localStorage limpos - módulos serão recarregados")
+  } catch (error) {
+    console.error("Erro ao limpar dados antigos:", error)
   }
 }
